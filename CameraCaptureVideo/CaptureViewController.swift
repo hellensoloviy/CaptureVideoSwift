@@ -86,9 +86,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        view.layer.addSublayer(previewLayer)
+//        view.layer.addSublayer(previewLayer)
         view.addSubview(overlayView())
-        cameraSession.startRunning()
+//        cameraSession.startRunning()
         addPlayStopButton()
         
     }
@@ -129,11 +129,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         return overlayView
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        
-    }
-    
     var cameraSession: AVCaptureSession?
 
     var previewLayer: AVCaptureVideoPreviewLayer?
@@ -141,6 +136,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     @IBAction func cameraSourceChanged(sender: AnyObject) {
         camera = !camera
         self.setupCameraSession()
+        self.addPlayStopButton()
     }
     
     
@@ -181,6 +177,14 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             
             cameraSession!.commitConfiguration()
             
+            if (cameraSession!.canSetSessionPreset(AVCaptureSessionPresetHigh)) {
+                cameraSession!.sessionPreset = AVCaptureSessionPresetHigh
+            } else {
+                cameraSession!.sessionPreset = AVCaptureSessionPresetMedium
+            }
+            
+            cameraSession!.commitConfiguration()
+            
             let queue = dispatch_queue_create("com.regionit.videoQueue", DISPATCH_QUEUE_SERIAL)
             dataOutput.setSampleBufferDelegate(self, queue: queue)
             
@@ -193,7 +197,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             
             view.layer.addSublayer(previewLayer!)
             view.addSubview(overlayView())
-            
             cameraSession!.startRunning()
         }
             
