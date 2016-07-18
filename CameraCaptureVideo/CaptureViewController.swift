@@ -7,51 +7,11 @@
 //
 
 import UIKit
-
 import AVFoundation
 
-class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
+class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate, AVCaptureFileOutputRecordingDelegate {
     
     var isRecording = false
-    
-//    @IBAction func switchCameraButtonAction(sender: UIButton) {
-//    
-//    if(session)
-//    {
-//    [session beginConfiguration];
-//    
-//    AVCaptureInput *currentCameraInput = [session.inputs objectAtIndex:0];
-//    
-//    [session removeInput:currentCameraInput];
-//
-//    AVCaptureDevice *newCamera = nil;
-//    
-//    if(((AVCaptureDeviceInput*)currentCameraInput).device.position == AVCaptureDevicePositionBack)
-//    {
-//    newCamera = [self cameraWithPosition:AVCaptureDevicePositionFront];
-//    }
-//    else
-//    {
-//    newCamera = [self cameraWithPosition:AVCaptureDevicePositionBack];
-//    }
-//    
-//    NSError *err = nil;
-//    
-//    AVCaptureDeviceInput *newVideoInput = [[AVCaptureDeviceInput alloc] initWithDevice:newCamera error:&err];
-//    
-//    if(!newVideoInput || err)
-//    {
-//    NSLog(@"Error creating capture device input: %@", err.localizedDescription);
-//    }
-//    else
-//    {
-//    [session addInput:newVideoInput];
-//    }
-//    
-//    [session commitConfiguration];
-//    }
-//
-//    }
     var camera : Bool = true
     
     override func viewDidLoad() {
@@ -217,7 +177,41 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         // Here you can count how many frames are dopped
     }
     
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
+        
+    }
 
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
+        
+        if (error == nil) {
+            print("Suscess")
+            
+            
+            
+        } else {
+            print("Erorr!")
+            
+        }
+    }
+
+    
+//    func saveToCameraRoll(URL: NSURL!) {
+//        
+//        NSLog("srcURL: %@", URL)
+//        var library: ALAssetsLibrary = ALAssetsLibrary()
+//        var videoWriteCompletionBlock: ALAssetsLibraryWriteVideoCompletionBlock = {(newURL: NSURL!, error: NSError!) in
+//            if (error != nil) {
+//                NSLog("Error writing image with metadata to Photo Library: %@", error)
+//            }
+//            else {
+//                NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString!)
+//            }
+//            
+//        }
+//        if library.videoAtPathIsCompatibleWithSavedPhotosAlbum(URL) {
+//            library.writeVideoAtPathToSavedPhotosAlbum(URL, completionBlock: videoWriteCompletionBlock)
+//        }
+//    }
 
 
     //MARK: PLay/Stop button
@@ -243,17 +237,41 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         if (isRecording == false) {
             print("Starting Recording")
             isRecording = true
-            
-            //ur code
+            startRecording()
             
         } else {
             print("Stop Recording")
             isRecording = false
-            
-            //ur stop code
+            stopRecording()
         }
     }
 
+    
+    var filePath : NSURL {
+        
+            let documentsURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
+            let filePath = documentsURL.URLByAppendingPathComponent("temp")
+            return filePath
+        
+    }
+    
+    var videoFileOutput = AVCaptureMovieFileOutput()
+    
+    func startRecording() {
+        print("Start")
+
+        let recordingDelegate:AVCaptureFileOutputRecordingDelegate? = self
+        
+        cameraSession!.addOutput(videoFileOutput)
+        
+        videoFileOutput.startRecordingToOutputFileURL(filePath, recordingDelegate: recordingDelegate)
+    }
+    
+    func stopRecording() {
+        print("Stop Recording")
+        videoFileOutput.stopRecording()
+        
+    }
 
 }
 
