@@ -99,6 +99,10 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         self.addPlayStopButton()
     }
     
+    @IBAction func popToController(sender: AnyObject) {
+        self.navigationController?.popViewControllerAnimated(true)
+    }
+    
     
     func setupCameraSession() {
         var captureDevice:AVCaptureDevice! = nil
@@ -213,14 +217,15 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
 //        }
 //    }
 
-
+    var startButton = UIButton.init(type: .Custom)
+    
     //MARK: PLay/Stop button
     func addPlayStopButton() {
         
-        let startButton = UIButton.init(type: .Custom)
+//        let startButton = UIButton.init(type: .Custom)
         startButton.frame = CGRectMake(0, 0, UIScreen.mainScreen().bounds.size.width/3 , 30)
         startButton.setTitle("Go!", forState: .Normal)
-        startButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        startButton.setTitleColor(UIColor.greenColor(), forState: .Normal)
         startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
         
         let width = UIScreen.mainScreen().bounds.size.width
@@ -237,12 +242,21 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         if (isRecording == false) {
             print("Starting Recording")
             isRecording = true
+            
+            startButton.setTitle("Recording..", forState: .Normal) // time
+            startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
+            
             startRecording()
+            
             
         } else {
             print("Stop Recording")
             isRecording = false
             stopRecording()
+            
+            startButton.setTitle("Go!", forState: .Normal) // time
+            startButton.setTitleColor(UIColor.greenColor(), forState: .Normal)
+            startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
         }
     }
 
@@ -261,9 +275,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         print("Start")
 
         let recordingDelegate:AVCaptureFileOutputRecordingDelegate? = self
-        
         cameraSession!.addOutput(videoFileOutput)
-        
         videoFileOutput.startRecordingToOutputFileURL(filePath, recordingDelegate: recordingDelegate)
     }
     

@@ -82,6 +82,9 @@
                     <navigationItem key="navigationItem" id="6cF-cm-XZF">
                         <barButtonItem key="leftBarButtonItem" title="&lt;- Capture Your SAY" id="G01-di-8td">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <connections>
+                                <action selector="popToController:" destination="OSZ-Id-DIX" id="Dj3-Do-qsW"/>
+                            </connections>
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="ic_camera_rear_white" id="hrs-JP-jji">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
