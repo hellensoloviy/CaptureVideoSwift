@@ -12,6 +12,8 @@ import AVFoundation
 
 class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
     
+    var isRecording = false
+    
 //    @IBAction func switchCameraButtonAction(sender: UIButton) {
 //    
 //    if(session)
@@ -72,10 +74,20 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
 //        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeigth))
 //        view.backgroundColor = UIColor.blackColor()
 //        self.view.addSubview(statusBarView)
-
     }
     
     
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        view.layer.addSublayer(previewLayer)
+        view.addSubview(overlayView())
+        cameraSession.startRunning()
+        addPlayStopButton()
+        
+    }
+    
+     //MARK: overlay
     func overlayView() -> UIView {
         let overlayView = UIView()
         overlayView.frame = UIScreen.mainScreen().bounds
@@ -91,7 +103,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         visualEffectView.frame = overlayView.frame
         
         overlayView.addSubview(visualEffectView)
-        
         
         let shapeLayer = CAShapeLayer()
         let path1 = CGPathCreateMutable()
@@ -109,17 +120,11 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         imageView.backgroundColor = UIColor.clearColor()
         overlayView.addSubview(imageView)
         
-        
         return overlayView
     }
     
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        
-        view.layer.addSublayer(previewLayer)
-        view.addSubview(overlayView())
-        cameraSession.startRunning()
-    }
+    
+     //MARK: Camera Session
     
     lazy var cameraSession: AVCaptureSession = {
         let s = AVCaptureSession()
@@ -174,6 +179,10 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
     
+    
+    
+     //MARK: Camera Delegate Methods
+    
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
         // Here you collect each frame and process it
     }
@@ -182,5 +191,43 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         // Here you can count how many frames are dopped
     }
     
+
+
+
+    //MARK: PLay/Stop button
+    func addPlayStopButton() {
+        
+        let startButton = UIButton.init(type: .Custom)
+        startButton.frame = CGRectMake(0, 0, UIScreen.mainScreen().bounds.size.width/3 , 30)
+        startButton.setTitle("Go!", forState: .Normal)
+        startButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
+        
+        let width = UIScreen.mainScreen().bounds.size.width
+        let height = UIScreen.mainScreen().bounds.size.height
+        
+        startButton.center = CGPointMake(width/2,
+                                         height/2 + width/2)
+        
+        view.addSubview(startButton)
+    }
+    
+    func changeRecordingState(sender: UIButton) {
+        
+        if (isRecording == false) {
+            print("Starting Recording")
+            isRecording = true
+            
+            //ur code
+            
+        } else {
+            print("Stop Recording")
+            isRecording = false
+            
+            //ur stop code
+        }
+    }
+
+
 }
 
