@@ -124,7 +124,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         
         let shapeLayer = CAShapeLayer()
         let path1 = CGPathCreateMutable()
-        CGPathAddEllipseInRect(path1, nil, pathRectFrame)
+        CGPathAddRect(path1, nil, pathRectFrame)
         
         CGPathAddRect(path1, nil, overlayView.frame);
         shapeLayer.path = path1
