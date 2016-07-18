@@ -11,7 +11,13 @@ import AVFoundation
 
 class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate, AVCaptureFileOutputRecordingDelegate {
     
-    var isRecording = false
+    var isRecording = false {
+        didSet {
+                if isRecording {
+                    prepareRecordControls()
+                }
+        }
+    }
     var camera : Bool = true
     
     override func viewDidLoad() {
@@ -90,7 +96,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     }
     
     var cameraSession: AVCaptureSession?
-
     var previewLayer: AVCaptureVideoPreviewLayer?
     
     @IBAction func cameraSourceChanged(sender: AnyObject) {
@@ -103,6 +108,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         self.navigationController?.popViewControllerAnimated(true)
     }
     
+    let dataOutput = AVCaptureVideoDataOutput()
     
     func setupCameraSession() {
         var captureDevice:AVCaptureDevice! = nil
@@ -135,7 +141,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
                 cameraSession!.addInput(input)
             }
             
-            let dataOutput = AVCaptureVideoDataOutput()
+            
             dataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(unsignedInt: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
             dataOutput.alwaysDiscardsLateVideoFrames = true
             
@@ -147,10 +153,11 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
                 cameraSession!.sessionPreset = AVCaptureSessionPresetMedium
             }
             
-            cameraSession!.commitConfiguration()
-            
             let queue = dispatch_queue_create("com.regionit.videoQueue", DISPATCH_QUEUE_SERIAL)
             dataOutput.setSampleBufferDelegate(self, queue: queue)
+            
+            cameraSession!.commitConfiguration()
+            
             
             let preview =  AVCaptureVideoPreviewLayer(session: self.cameraSession)
             preview.bounds = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
@@ -171,15 +178,16 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     
     
     
-     //MARK: Camera Delegate Methods
-    
-    func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
-        // Here you collect each frame and process it
-    }
-    
-    func captureOutput(captureOutput: AVCaptureOutput!, didDropSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
-        // Here you can count how many frames are dopped
-    }
+//     //MARK: Camera Delegate Methods
+//    
+//    func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+//        // Here you collect each frame and process it
+//        
+//    }
+//    
+//    func captureOutput(captureOutput: AVCaptureOutput!, didDropSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
+//        // Here you can count how many frames are dopped
+//    }
     
     func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
         
@@ -240,6 +248,8 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     func changeRecordingState(sender: UIButton) {
         
         if (isRecording == false) {
+            
+            
             print("Starting Recording")
             isRecording = true
             
@@ -264,7 +274,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     var filePath : NSURL {
         
             let documentsURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
-            let filePath = documentsURL.URLByAppendingPathComponent("temp")
+            let filePath = documentsURL.URLByAppendingPathComponent(self.randomStringWithLength() as String)
             return filePath
         
     }
@@ -273,17 +283,78 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     
     func startRecording() {
         print("Start")
-
         let recordingDelegate:AVCaptureFileOutputRecordingDelegate? = self
+        videoFileOutput = AVCaptureMovieFileOutput()
         cameraSession!.addOutput(videoFileOutput)
+        startCounter()
         videoFileOutput.startRecordingToOutputFileURL(filePath, recordingDelegate: recordingDelegate)
     }
     
     func stopRecording() {
         print("Stop Recording")
         videoFileOutput.stopRecording()
+        stopCounter();
+        self.setupCameraSession()
+        self.addPlayStopButton()
         
     }
+    
+    //MARK: time 
+    
+    var timeElapsed: UInt32 = 0
+    var secondTimer: NSTimer?
+    
+    func prepareRecordControls() {
+        timeElapsed = 0
+        updateTimeLabel(0)
+    }
+    
+    func startCounter() {
+        secondTimer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(secondElapsed), userInfo: nil, repeats: true)
+    }
+    
+    func secondElapsed() {
+        updateTimeLabel(++timeElapsed)
+    }
+    
+    func updateTimeLabel(time:UInt32) {
+        let seconds = time%60
+        let minutes = (time%(60*60))/60
+        let hours = time/(60*60)
+        let timeStr = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        startButton.setTitle(timeStr, forState: .Normal)
+    }
+    
+    func stopCounter() {
+        secondTimer?.invalidate()
+    }
+    
+    //MARK: String
+    
+    func randomStringWithLength (len : Int = 20) -> NSString {
+        
+        let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let randomString : NSMutableString = NSMutableString(capacity: len)
+        for _ in 0 ..< len {
+            let length = UInt32 (letters.length)
+            let rand = arc4random_uniform(length)
+            randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))
+        }
+        
+        return randomString
+        
+    }
+    
+//    - (NSString *)randomStringWithLength:(int)length{
+//    NSString *alphabet  = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789";
+//    NSMutableString *s = [NSMutableString stringWithCapacity:length];
+//    for (NSUInteger i = 0U; i < length; i++) {
+//    u_int32_t r = arc4random() % [alphabet length];
+//    unichar c = [alphabet characterAtIndex:r];
+//    [s appendFormat:@"%C", c];
+//    }
+//    return s;
+
 
 }
 
