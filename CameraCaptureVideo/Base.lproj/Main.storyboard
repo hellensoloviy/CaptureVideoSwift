@@ -85,6 +85,9 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="ic_camera_rear_white" id="hrs-JP-jji">
                             <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <connections>
+                                <action selector="cameraSourceChanged:" destination="OSZ-Id-DIX" id="5oL-dD-9sK"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                 </viewController>

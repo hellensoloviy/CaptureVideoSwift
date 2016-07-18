@@ -21,7 +21,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
 //    AVCaptureInput *currentCameraInput = [session.inputs objectAtIndex:0];
 //    
 //    [session removeInput:currentCameraInput];
-//    
+//
 //    AVCaptureDevice *newCamera = nil;
 //    
 //    if(((AVCaptureDeviceInput*)currentCameraInput).device.position == AVCaptureDevicePositionBack)
@@ -50,6 +50,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
 //    }
 //
 //    }
+    var camera : Bool = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -137,50 +138,68 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        view.layer.addSublayer(previewLayer)
-        view.addSubview(overlayView())
-        cameraSession.startRunning()
     }
     
-    lazy var cameraSession: AVCaptureSession = {
-        let s = AVCaptureSession()
-        s.sessionPreset = AVCaptureSessionPresetLow
-        return s
-    }()
+    var cameraSession: AVCaptureSession?
+
+    var previewLayer: AVCaptureVideoPreviewLayer?
     
-    lazy var previewLayer: AVCaptureVideoPreviewLayer = {
-        let preview =  AVCaptureVideoPreviewLayer(session: self.cameraSession)
-        preview.bounds = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
-        preview.position = CGPoint(x: CGRectGetMidX(self.view.bounds), y: CGRectGetMidY(self.view.bounds))
-        preview.videoGravity = AVLayerVideoGravityResize
-        return preview
-    }()
+    @IBAction func cameraSourceChanged(sender: AnyObject) {
+        camera = !camera
+        self.setupCameraSession()
+    }
     
     func setupCameraSession() {
-        let captureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo) as AVCaptureDevice
+        var captureDevice:AVCaptureDevice! = nil
+        
+        cameraSession?.stopRunning()
+        
+        cameraSession = AVCaptureSession()
+        cameraSession!.sessionPreset = AVCaptureSessionPresetLow
         
         do {
-            let deviceInput = try AVCaptureDeviceInput(device: captureDevice)
+            if (camera == false) {
+                let videoDevices = AVCaptureDevice.devicesWithMediaType(AVMediaTypeVideo)
+                
+                for device in videoDevices{
+                    let device = device as! AVCaptureDevice
+                    if device.position == AVCaptureDevicePosition.Front {
+                        captureDevice = device
+                        break
+                    }
+                }
+            } else {
+                captureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+            }
             
-            cameraSession.beginConfiguration()
+            cameraSession!.beginConfiguration()
             
-            if (cameraSession.canAddInput(deviceInput) == true) {
-                cameraSession.addInput(deviceInput)
+            let input = try AVCaptureDeviceInput(device: captureDevice)
+            
+            if (cameraSession!.canAddInput(input) == true) {
+                cameraSession!.addInput(input)
             }
             
             let dataOutput = AVCaptureVideoDataOutput()
             dataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(unsignedInt: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
             dataOutput.alwaysDiscardsLateVideoFrames = true
             
-            if (cameraSession.canAddOutput(dataOutput) == true) {
-                cameraSession.addOutput(dataOutput)
-            }
-            
-            cameraSession.commitConfiguration()
+            cameraSession!.commitConfiguration()
             
             let queue = dispatch_queue_create("com.regionit.videoQueue", DISPATCH_QUEUE_SERIAL)
             dataOutput.setSampleBufferDelegate(self, queue: queue)
             
+            let preview =  AVCaptureVideoPreviewLayer(session: self.cameraSession)
+            preview.bounds = CGRect(x: 0, y: 0, width: self.view.bounds.width, height: self.view.bounds.height)
+            preview.position = CGPoint(x: CGRectGetMidX(self.view.bounds), y: CGRectGetMidY(self.view.bounds))
+            preview.videoGravity = AVLayerVideoGravityResize
+            
+            previewLayer = preview;
+            
+            view.layer.addSublayer(previewLayer!)
+            view.addSubview(overlayView())
+            
+            cameraSession!.startRunning()
         }
         catch let error as NSError {
             NSLog("\(error), \(error.localizedDescription)")
