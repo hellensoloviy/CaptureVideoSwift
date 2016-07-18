@@ -80,16 +80,11 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         let overlayView = UIView()
         overlayView.frame = UIScreen.mainScreen().bounds
         
-//        var imageLayer = CALayer.i
-        
         let halfWidth = overlayView.frame.size.width/4
         let width = overlayView.frame.size.width/2
         let height = overlayView.frame.size.height/3
         
         let pathRectFrame = CGRectMake(halfWidth, height+15, width, width)
-//        
-//        let path = UIBezierPath.init(roundedRect: overlayView.frame, cornerRadius: 0)
-//        let rectPath = UIBezierPath.init(roundedRect: pathRectFrame, cornerRadius: 8)
         
         let blur = UIBlurEffect.init(style: .Dark)
         let visualEffectView = UIVisualEffectView.init(effect: blur)
@@ -97,24 +92,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         
         overlayView.addSubview(visualEffectView)
 
-        
-        
-//        path.appendPath(rectPath)
-//        path.usesEvenOddFillRule = true
-     
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.path = path.CGPath
-//        shapeLayer.fillRule = kCAFillRuleEvenOdd
-//        shapeLayer.fillColor = UIColor.whiteColor().CGColor
-//        shapeLayer.opacity = 0.5
-//
-//        CGRect imageViewFrame = imageView.bounds;
-//        CGRect circleFrame = CGRectMake(point.x-radius/2,point.y-radius/2,radius,radius);
-
-//
-        
-//        visualEffectView.layer.addSublayer(shapeLayer)
-        
         let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
         imageView.contentMode = .ScaleAspectFit
         imageView.frame = overlayView.frame
@@ -174,6 +151,13 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             
             if (cameraSession.canAddOutput(dataOutput) == true) {
                 cameraSession.addOutput(dataOutput)
+            }
+            
+            if (cameraSession.canSetSessionPreset(AVCaptureSessionPresetHigh)) {
+                cameraSession.sessionPreset = AVCaptureSessionPresetHigh
+            } else {
+                cameraSession.sessionPreset = AVCaptureSessionPresetMedium
+
             }
             
             cameraSession.commitConfiguration()
