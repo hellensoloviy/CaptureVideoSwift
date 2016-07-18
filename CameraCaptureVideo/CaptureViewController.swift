@@ -12,6 +12,8 @@ import AVFoundation
 
 class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
     
+    var isRecording = false
+    
 //    @IBAction func switchCameraButtonAction(sender: UIButton) {
 //    
 //    if(session)
@@ -55,6 +57,11 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCameraSession()
+        setupNavBar()
+        
+        }
+    
+    func setupNavBar() {
         
         let width = UIScreen.mainScreen().bounds.size.width
         let statusBarHeight : CGFloat = 20
@@ -69,68 +76,55 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         self.navigationController!.navigationBar.translucent = true
         self.navigationController!.view.backgroundColor = UIColor.clearColor()
         
-       
-//        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeigth))
-//        view.backgroundColor = UIColor.blackColor()
-//        self.view.addSubview(statusBarView)
+        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeight))
+        view.backgroundColor = UIColor.blackColor()
+        self.view.addSubview(statusBarView)
 
     }
     
     
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        view.layer.addSublayer(previewLayer)
+        view.addSubview(overlayView())
+        cameraSession.startRunning()
+        addPlayStopButton()
+        
+    }
+    
+     //MARK: overlay
     func overlayView() -> UIView {
         let overlayView = UIView()
         overlayView.frame = UIScreen.mainScreen().bounds
-        
-//        var imageLayer = CALayer.i
         
         let halfWidth = overlayView.frame.size.width/4
         let width = overlayView.frame.size.width/2
         let height = overlayView.frame.size.height/3
         
         let pathRectFrame = CGRectMake(halfWidth, height+15, width, width)
-//        
-//        let path = UIBezierPath.init(roundedRect: overlayView.frame, cornerRadius: 0)
-//        let rectPath = UIBezierPath.init(roundedRect: pathRectFrame, cornerRadius: 8)
         
         let blur = UIBlurEffect.init(style: .Dark)
         let visualEffectView = UIVisualEffectView.init(effect: blur)
         visualEffectView.frame = overlayView.frame
         
         overlayView.addSubview(visualEffectView)
+        
+        let shapeLayer = CAShapeLayer()
+        let path1 = CGPathCreateMutable()
+        CGPathAddRect(path1, nil, pathRectFrame)
+        
+        CGPathAddRect(path1, nil, overlayView.frame);
+        shapeLayer.path = path1
+        shapeLayer.fillRule = kCAFillRuleEvenOdd
+        overlayView.layer.mask = shapeLayer
 
-        
-        
-//        path.appendPath(rectPath)
-//        path.usesEvenOddFillRule = true
-     
-//        let shapeLayer = CAShapeLayer()
-//        shapeLayer.path = path.CGPath
-//        shapeLayer.fillRule = kCAFillRuleEvenOdd
-//        shapeLayer.fillColor = UIColor.whiteColor().CGColor
-//        shapeLayer.opacity = 0.5
-//
-//        CGRect imageViewFrame = imageView.bounds;
-//        CGRect circleFrame = CGRectMake(point.x-radius/2,point.y-radius/2,radius,radius);
-
-//
-        
-//        visualEffectView.layer.addSublayer(shapeLayer)
-        
         let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
         imageView.contentMode = .ScaleAspectFit
         imageView.frame = overlayView.frame
         imageView.clipsToBounds = true
         imageView.backgroundColor = UIColor.clearColor()
         overlayView.addSubview(imageView)
-        
-        let shapeLayer = CAShapeLayer()
-        let path1 = CGPathCreateMutable()
-        CGPathAddEllipseInRect(path1, nil, pathRectFrame)
-        
-        CGPathAddRect(path1, nil, overlayView.frame);
-        shapeLayer.path = path1
-        shapeLayer.fillRule = kCAFillRuleEvenOdd
-        overlayView.layer.mask = shapeLayer
         
         return overlayView
     }
@@ -148,6 +142,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         camera = !camera
         self.setupCameraSession()
     }
+    
     
     func setupCameraSession() {
         var captureDevice:AVCaptureDevice! = nil
@@ -201,10 +196,15 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             
             cameraSession!.startRunning()
         }
+            
         catch let error as NSError {
             NSLog("\(error), \(error.localizedDescription)")
         }
     }
+    
+    
+    
+     //MARK: Camera Delegate Methods
     
     func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
         // Here you collect each frame and process it
@@ -214,5 +214,43 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         // Here you can count how many frames are dopped
     }
     
+
+
+
+    //MARK: PLay/Stop button
+    func addPlayStopButton() {
+        
+        let startButton = UIButton.init(type: .Custom)
+        startButton.frame = CGRectMake(0, 0, UIScreen.mainScreen().bounds.size.width/3 , 30)
+        startButton.setTitle("Go!", forState: .Normal)
+        startButton.setTitleColor(UIColor.whiteColor(), forState: .Normal)
+        startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
+        
+        let width = UIScreen.mainScreen().bounds.size.width
+        let height = UIScreen.mainScreen().bounds.size.height
+        
+        startButton.center = CGPointMake(width/2,
+                                         height/2 + width/2)
+        
+        view.addSubview(startButton)
+    }
+    
+    func changeRecordingState(sender: UIButton) {
+        
+        if (isRecording == false) {
+            print("Starting Recording")
+            isRecording = true
+            
+            //ur code
+            
+        } else {
+            print("Stop Recording")
+            isRecording = false
+            
+            //ur stop code
+        }
+    }
+
+
 }
 
