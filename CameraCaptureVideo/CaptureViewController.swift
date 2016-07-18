@@ -56,6 +56,11 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCameraSession()
+        setupNavBar()
+        
+        }
+    
+    func setupNavBar() {
         
         let width = UIScreen.mainScreen().bounds.size.width
         let statusBarHeight : CGFloat = 20
@@ -70,10 +75,10 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         self.navigationController!.navigationBar.translucent = true
         self.navigationController!.view.backgroundColor = UIColor.clearColor()
         
-       
-//        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeigth))
-//        view.backgroundColor = UIColor.blackColor()
-//        self.view.addSubview(statusBarView)
+        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeight))
+        view.backgroundColor = UIColor.blackColor()
+        self.view.addSubview(statusBarView)
+
     }
     
     
