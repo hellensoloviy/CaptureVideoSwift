@@ -1,25 +1,107 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6211" systemVersion="14A298i" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="zX3-N6-neB">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6204"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
-        <scene sceneID="tne-QT-ifu">
+        <!--Navigation Controller-->
+        <scene sceneID="C41-TE-hAY">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <navigationController id="zX3-N6-neB" sceneMemberID="viewController">
+                    <simulatedStatusBarMetrics key="simulatedStatusBarMetrics" statusBarStyle="lightContent"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="8n4-TI-Nv0">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="txA-FY-Jfg" kind="relationship" relationship="rootViewController" id="xTZ-Tl-8cN"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SRG-tz-wvP" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="413" y="421"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="nRU-RM-Dj1">
+            <objects>
+                <viewController id="txA-FY-Jfg" sceneMemberID="viewController">
                     <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
-                        <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
+                        <viewControllerLayoutGuide type="top" id="58h-5s-mx3"/>
+                        <viewControllerLayoutGuide type="bottom" id="R71-FW-zlf"/>
                     </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
+                    <view key="view" contentMode="scaleToFill" id="iZU-a2-y6q">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <subviews>
+                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" image="CaptureDeviceFrame" translatesAutoresizingMaskIntoConstraints="NO" id="qZe-cZ-DSp">
+                                <rect key="frame" x="200" y="200" width="200" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="8G9-lI-brg"/>
+                                    <constraint firstAttribute="height" constant="200" id="Thm-0i-MOf"/>
+                                </constraints>
+                            </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Jn-xe-DWz">
+                                <rect key="frame" x="200" y="200" width="200" height="200"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="40"/>
+                                <state key="normal" title="GO!"/>
+                                <connections>
+                                    <segue destination="OSZ-Id-DIX" kind="show" id="LBc-lP-bik"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="qZe-cZ-DSp" firstAttribute="centerY" secondItem="iZU-a2-y6q" secondAttribute="centerY" id="3Xd-WY-oYl"/>
+                            <constraint firstItem="4Jn-xe-DWz" firstAttribute="centerX" secondItem="qZe-cZ-DSp" secondAttribute="centerX" id="JwB-5V-yQw"/>
+                            <constraint firstItem="4Jn-xe-DWz" firstAttribute="width" secondItem="qZe-cZ-DSp" secondAttribute="width" id="Tbe-sP-9wM"/>
+                            <constraint firstItem="4Jn-xe-DWz" firstAttribute="height" secondItem="qZe-cZ-DSp" secondAttribute="height" id="ULh-PC-jGv"/>
+                            <constraint firstItem="4Jn-xe-DWz" firstAttribute="centerY" secondItem="qZe-cZ-DSp" secondAttribute="centerY" id="qBp-dd-9b1"/>
+                            <constraint firstItem="qZe-cZ-DSp" firstAttribute="centerX" secondItem="iZU-a2-y6q" secondAttribute="centerX" id="vnr-eQ-sRK"/>
+                        </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="VhZ-lg-er3"/>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1Yh-ql-Mxu" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="1126" y="421"/>
+        </scene>
+        <!--Capture View Controller-->
+        <scene sceneID="2Kb-zR-JOR">
+            <objects>
+                <viewController id="OSZ-Id-DIX" customClass="CaptureViewController" customModule="CameraCaptureVideo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="q3s-bn-ffv"/>
+                        <viewControllerLayoutGuide type="bottom" id="bUV-qI-pCo"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="cg2-Wi-7sU">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="6cF-cm-XZF">
+                        <barButtonItem key="leftBarButtonItem" title="&lt;- Capture Your SAY" id="G01-di-8td">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" image="ic_camera_rear_white" id="hrs-JP-jji">
+                            <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </barButtonItem>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sQ3-Qz-mLn" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FbB-Nz-1tC">
+                    <rect key="frame" x="0.0" y="0.0" width="600" height="20"/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="20" id="9vW-7b-ZYH"/>
+                    </constraints>
+                </view>
+            </objects>
+            <point key="canvasLocation" x="1804" y="421"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="CaptureDeviceFrame" width="569" height="559"/>
+        <image name="ic_camera_rear_white" width="24" height="24"/>
+    </resources>
 </document>
