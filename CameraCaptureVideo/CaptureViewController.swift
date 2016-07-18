@@ -10,11 +10,52 @@ import UIKit
 
 import AVFoundation
 
-class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
+    
+//    @IBAction func switchCameraButtonAction(sender: UIButton) {
+//    
+//    if(session)
+//    {
+//    [session beginConfiguration];
+//    
+//    AVCaptureInput *currentCameraInput = [session.inputs objectAtIndex:0];
+//    
+//    [session removeInput:currentCameraInput];
+//    
+//    AVCaptureDevice *newCamera = nil;
+//    
+//    if(((AVCaptureDeviceInput*)currentCameraInput).device.position == AVCaptureDevicePositionBack)
+//    {
+//    newCamera = [self cameraWithPosition:AVCaptureDevicePositionFront];
+//    }
+//    else
+//    {
+//    newCamera = [self cameraWithPosition:AVCaptureDevicePositionBack];
+//    }
+//    
+//    NSError *err = nil;
+//    
+//    AVCaptureDeviceInput *newVideoInput = [[AVCaptureDeviceInput alloc] initWithDevice:newCamera error:&err];
+//    
+//    if(!newVideoInput || err)
+//    {
+//    NSLog(@"Error creating capture device input: %@", err.localizedDescription);
+//    }
+//    else
+//    {
+//    [session addInput:newVideoInput];
+//    }
+//    
+//    [session commitConfiguration];
+//    }
+//
+//    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupCameraSession()
+        
+        
         
         let width = UIScreen.mainScreen().bounds.size.width
         let statusBarHeight : CGFloat = 20
@@ -43,12 +84,33 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         
 //        var imageLayer = CALayer.i
         
+        let halfWidth = overlayView.frame.size.width/4
+        let width = overlayView.frame.size.width/2
+        let height = overlayView.frame.size.height/3
+        
+        let pathRectFrame = CGRectMake(halfWidth, height+15, width, width)
+        
+        let path = UIBezierPath.init(roundedRect: overlayView.frame, cornerRadius: 0)
+        let rectPath = UIBezierPath.init(roundedRect: pathRectFrame, cornerRadius: 8)
+        
         let blur = UIBlurEffect.init(style: .Dark)
         let visualEffectView = UIVisualEffectView.init(effect: blur)
         visualEffectView.frame = overlayView.frame
-        overlayView.addSubview(visualEffectView)
         
-        let path = UIBezierPath.init(roundedRect: CGRectMake(<#T##x: CGFloat##CGFloat#>, <#T##y: CGFloat##CGFloat#>, <#T##width: CGFloat##CGFloat#>, <#T##height: CGFloat##CGFloat#>), cornerRadius: <#T##CGFloat#>)
+        
+        
+        path.appendPath(rectPath)
+        path.usesEvenOddFillRule = true
+        
+        let shapeLayer = CAShapeLayer()
+        shapeLayer.path = path.CGPath
+        shapeLayer.fillRule = kCAFillRuleEvenOdd
+        shapeLayer.fillColor = UIColor.whiteColor().CGColor
+        shapeLayer.opacity = 0.5
+        
+        visualEffectView.layer.addSublayer(shapeLayer)
+        overlayView.addSubview(visualEffectView)
+
         
         let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
         imageView.contentMode = .ScaleAspectFit
@@ -122,4 +184,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     }
     
 }
+
+
 
