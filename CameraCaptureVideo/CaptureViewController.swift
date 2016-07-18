@@ -91,13 +91,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         visualEffectView.frame = overlayView.frame
         
         overlayView.addSubview(visualEffectView)
-
-        let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
-        imageView.contentMode = .ScaleAspectFit
-        imageView.frame = overlayView.frame
-        imageView.clipsToBounds = true
-        imageView.backgroundColor = UIColor.clearColor()
-        overlayView.addSubview(imageView)
+        
         
         let shapeLayer = CAShapeLayer()
         let path1 = CGPathCreateMutable()
@@ -107,6 +101,14 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         shapeLayer.path = path1
         shapeLayer.fillRule = kCAFillRuleEvenOdd
         overlayView.layer.mask = shapeLayer
+
+        let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
+        imageView.contentMode = .ScaleAspectFit
+        imageView.frame = overlayView.frame
+        imageView.clipsToBounds = true
+        imageView.backgroundColor = UIColor.clearColor()
+        overlayView.addSubview(imageView)
+        
         
         return overlayView
     }
@@ -133,6 +135,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         return preview
     }()
     
+    
     func setupCameraSession() {
         let captureDevice = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo) as AVCaptureDevice
         
@@ -157,7 +160,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
                 cameraSession.sessionPreset = AVCaptureSessionPresetHigh
             } else {
                 cameraSession.sessionPreset = AVCaptureSessionPresetMedium
-
             }
             
             cameraSession.commitConfiguration()
@@ -166,6 +168,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             dataOutput.setSampleBufferDelegate(self, queue: queue)
             
         }
+            
         catch let error as NSError {
             NSLog("\(error), \(error.localizedDescription)")
         }
