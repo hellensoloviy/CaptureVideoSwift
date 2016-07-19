@@ -42,10 +42,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         self.navigationController!.navigationBar.shadowImage = UIImage()
         self.navigationController!.navigationBar.translucent = true
         self.navigationController!.view.backgroundColor = UIColor.clearColor()
-        
-        let statusBarView = UIView.init(frame: CGRectMake(0, 0, width, statusBarHeight))
-        view.backgroundColor = UIColor.blackColor()
-        self.view.addSubview(statusBarView)
+
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
+
 
     }
     
@@ -203,7 +202,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
     
-    //TODO: Spizz*nui metod
         func cropVideoToSquareCentered(path: NSURL, completion: (newPath: NSURL) -> ()) {
         let asset = AVAsset(URL: path)
         guard let track = asset.tracksWithMediaType(AVMediaTypeVideo).first else {
@@ -240,7 +238,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         exporter.exportAsynchronouslyWithCompletionHandler { () -> Void in
             if (exporter.status == .Completed) {
                 //If change tempath to path it will be saved to camera roll
-                completion(newPath: tempPath)
+                completion(newPath: path)
             }
         }
     }
@@ -372,8 +370,13 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
         return randomString
     }
+    
+    override func viewDidDisappear(animated: Bool) {
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
+
+    }
 }
-//TODO: Spizz*nui metod
+
 extension NSURL {
     static func tempPathForFile(name: String) -> NSURL {
         let outputPath = NSTemporaryDirectory() + name
