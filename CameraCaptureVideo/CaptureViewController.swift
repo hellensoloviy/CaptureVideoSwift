@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import AssetsLibrary
 
 class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate, AVCaptureFileOutputRecordingDelegate {
     
@@ -51,10 +52,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-//        view.layer.addSublayer(previewLayer)
         view.addSubview(overlayView())
-//        cameraSession.startRunning()
         addPlayStopButton()
         
     }
@@ -197,33 +195,72 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         
         if (error == nil) {
             print("Suscess")
-            
-            
-            
+            self.cropVideoToSquareCentered(outputFileURL, completion: { (newPath) in
+                self.saveToCameraRoll(newPath)
+            })
         } else {
             print("Erorr!")
+        }
+    }
+    
+    //TODO: Spizz*nui metod
+        func cropVideoToSquareCentered(path: NSURL, completion: (newPath: NSURL) -> ()) {
+        let asset = AVAsset(URL: path)
+        guard let track = asset.tracksWithMediaType(AVMediaTypeVideo).first else {
+            //TODO throw error
+            return
+        }
+        
+        let composition = AVMutableVideoComposition()
+
+        composition.frameDuration = track.minFrameDuration
+        let trackSize = track.naturalSize
+        composition.renderSize = CGSizeMake(trackSize.width, trackSize.width)
+        
+        let compositionInstruction = AVMutableVideoCompositionInstruction()
+        compositionInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeMakeWithSeconds(60, 30));
+        
+        let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: track)
             
+        let transform = CGAffineTransformMakeTranslation(0, -(trackSize.height-trackSize.width)/2)
+        layerInstruction.setTransform(transform, atTime: kCMTimeZero)
+        
+        compositionInstruction.layerInstructions = [layerInstruction]
+        composition.instructions = [compositionInstruction]
+
+        let tempPath = NSURL.tempPathForFile("temp_cropped.m4v")
+            
+        guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
+            return
+        }
+            //TODO: to know why tempPath don't work in saveToCameraRoll method.
+        exporter.videoComposition = composition
+        exporter.outputURL = tempPath
+        exporter.outputFileType = AVFileTypeMPEG4
+        exporter.exportAsynchronouslyWithCompletionHandler { () -> Void in
+            if (exporter.status == .Completed) {
+                //If change tempath to path it will be saved to camera roll
+                completion(newPath: tempPath)
+            }
         }
     }
 
-    
-//    func saveToCameraRoll(URL: NSURL!) {
-//        
-//        NSLog("srcURL: %@", URL)
-//        var library: ALAssetsLibrary = ALAssetsLibrary()
-//        var videoWriteCompletionBlock: ALAssetsLibraryWriteVideoCompletionBlock = {(newURL: NSURL!, error: NSError!) in
-//            if (error != nil) {
-//                NSLog("Error writing image with metadata to Photo Library: %@", error)
-//            }
-//            else {
-//                NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString!)
-//            }
-//            
-//        }
-//        if library.videoAtPathIsCompatibleWithSavedPhotosAlbum(URL) {
-//            library.writeVideoAtPathToSavedPhotosAlbum(URL, completionBlock: videoWriteCompletionBlock)
-//        }
-//    }
+    func saveToCameraRoll(URL: NSURL!) {
+        
+        NSLog("srcURL: %@", URL)
+        let library: ALAssetsLibrary = ALAssetsLibrary()
+        let videoWriteCompletionBlock: ALAssetsLibraryWriteVideoCompletionBlock = {(newURL: NSURL!, error: NSError!) in
+            if (error != nil) {
+                NSLog("Error writing image with metadata to Photo Library: %@", error)
+            }
+            else {
+                NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString)
+            }
+        }
+        if library.videoAtPathIsCompatibleWithSavedPhotosAlbum(URL) {
+            library.writeVideoAtPathToSavedPhotosAlbum(URL, completionBlock: videoWriteCompletionBlock)
+        }
+    }
 
     var startButton = UIButton.init(type: .Custom)
     
@@ -269,15 +306,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
         }
     }
-
-    
-    var filePath : NSURL {
-        
-            let documentsURL = NSFileManager.defaultManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
-            let filePath = documentsURL.URLByAppendingPathComponent(self.randomStringWithLength() as String)
-            return filePath
-        
-    }
     
     var videoFileOutput = AVCaptureMovieFileOutput()
     
@@ -287,7 +315,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         videoFileOutput = AVCaptureMovieFileOutput()
         cameraSession!.addOutput(videoFileOutput)
         startCounter()
-        videoFileOutput.startRecordingToOutputFileURL(filePath, recordingDelegate: recordingDelegate)
+        
+        let outputUrl = NSURL(fileURLWithPath: NSTemporaryDirectory() + "test.m4v")
+        videoFileOutput.startRecordingToOutputFileURL(outputUrl, recordingDelegate: recordingDelegate)
     }
     
     func stopRecording() {
@@ -340,21 +370,21 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             let rand = arc4random_uniform(length)
             randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))
         }
-        
         return randomString
-        
     }
-    
-//    - (NSString *)randomStringWithLength:(int)length{
-//    NSString *alphabet  = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXZY0123456789";
-//    NSMutableString *s = [NSMutableString stringWithCapacity:length];
-//    for (NSUInteger i = 0U; i < length; i++) {
-//    u_int32_t r = arc4random() % [alphabet length];
-//    unichar c = [alphabet characterAtIndex:r];
-//    [s appendFormat:@"%C", c];
-//    }
-//    return s;
-
-
 }
-
+//TODO: Spizz*nui metod
+extension NSURL {
+    static func tempPathForFile(name: String) -> NSURL {
+        let outputPath = NSTemporaryDirectory() + name
+        if NSFileManager.defaultManager().fileExistsAtPath(outputPath) {
+            do {
+                try NSFileManager.defaultManager().removeItemAtPath(outputPath)
+            }
+            catch let error as NSError {
+                print(error.localizedDescription)
+            }
+        }
+        return NSURL(fileURLWithPath: outputPath)
+    }
+}
