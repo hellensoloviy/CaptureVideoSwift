@@ -108,6 +108,7 @@
 				TargetAttributes = {
 					9BABD7551D3CF9090004E8B4 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 57NTVVM6G2;
 					};
 				};
 			};
@@ -266,7 +267,7 @@
 				INFOPLIST_FILE = CameraCaptureVideo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = regionit.swift.CameraCaptureVideo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regionit.swift.CameraCaptureVideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};
@@ -281,7 +282,7 @@
 				INFOPLIST_FILE = CameraCaptureVideo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = regionit.swift.CameraCaptureVideo;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regionit.swift.CameraCaptureVideo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 			};

@@ -19,6 +19,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
                 }
         }
     }
+    
+    var isSaving = false
+    
     var camera : Bool = true
     
     override func viewDidLoad() {
@@ -139,7 +142,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             }
             
             
-            dataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(unsignedInt: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+            dataOutput.videoSettings =
+                [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(unsignedInt: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)]
+            
             dataOutput.alwaysDiscardsLateVideoFrames = true
             
             cameraSession!.commitConfiguration()
@@ -173,18 +178,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
     
-    
-    
-//     //MARK: Camera Delegate Methods
-//    
-//    func captureOutput(captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
-//        // Here you collect each frame and process it
-//        
-//    }
-//    
-//    func captureOutput(captureOutput: AVCaptureOutput!, didDropSampleBuffer sampleBuffer: CMSampleBuffer!, fromConnection connection: AVCaptureConnection!) {
-//        // Here you can count how many frames are dopped
-//    }
     
     func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
         
@@ -231,14 +224,18 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
             return
         }
-            //TODO: to know why tempPath don't work in saveToCameraRoll method.
         exporter.videoComposition = composition
         exporter.outputURL = tempPath
         exporter.outputFileType = AVFileTypeMPEG4
         exporter.exportAsynchronouslyWithCompletionHandler { () -> Void in
             if (exporter.status == .Completed) {
-                //If change tempath to path it will be saved to camera roll
+                
                 completion(newPath: path)
+                NSLog("path -- %@", path)
+                NSLog("tempPath -- %@", tempPath)
+                
+     
+
             }
         }
     }
@@ -253,6 +250,17 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             }
             else {
                 NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString)
+                
+                if (self.isSaving == true) {
+                    print("Stop Saving --")
+                    self.isSaving = false
+                    
+                    dispatch_async(dispatch_get_main_queue(), {
+                        self.startButton.setTitle("Go!", forState: .Normal) // time
+                        
+                    })
+                }
+                
             }
         }
         if library.videoAtPathIsCompatibleWithSavedPhotosAlbum(URL) {
@@ -265,9 +273,14 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     //MARK: PLay/Stop button
     func addPlayStopButton() {
         
-//        let startButton = UIButton.init(type: .Custom)
         startButton.frame = CGRectMake(0, 0, UIScreen.mainScreen().bounds.size.width/3 , 30)
-        startButton.setTitle("Go!", forState: .Normal)
+        
+        if (isSaving == true) {
+            startButton.setTitle("Saving..", forState: .Normal)
+        } else {
+            startButton.setTitle("Go!", forState: .Normal)
+        }
+        
         startButton.setTitleColor(UIColor.greenColor(), forState: .Normal)
         startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
         
@@ -284,7 +297,8 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         
         if (isRecording == false) {
             
-            
+            if (isSaving == true) { return }
+                
             print("Starting Recording")
             isRecording = true
             
@@ -295,10 +309,19 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             
             
         } else {
+            
             print("Stop Recording")
             isRecording = false
             stopRecording()
+
+            if (isSaving == false) {
+                print("Start Saving --")
+                isSaving = true
+                startButton.setTitle("Saving...", forState: .Normal) // time
+                return;
             
+            }
+
             startButton.setTitle("Go!", forState: .Normal) // time
             startButton.setTitleColor(UIColor.greenColor(), forState: .Normal)
             startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
