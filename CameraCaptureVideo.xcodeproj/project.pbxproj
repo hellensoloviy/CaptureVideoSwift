@@ -13,6 +13,9 @@
 		9BABD7611D3CF9090004E8B4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9BABD7601D3CF9090004E8B4 /* Assets.xcassets */; };
 		9BABD7641D3CF9090004E8B4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BABD7621D3CF9090004E8B4 /* LaunchScreen.storyboard */; };
 		9BABD76C1D3CFF810004E8B4 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9BABD76B1D3CFF810004E8B4 /* AVFoundation.framework */; };
+		9BF1E5AA1D3FAF0500301C04 /* HSRecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */; };
+		9BF1E5AC1D3FB09B00301C04 /* NSURLExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */; };
+		9BF1E5AE1D3FB29800301C04 /* HSOverlayPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +27,9 @@
 		9BABD7631D3CF9090004E8B4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9BABD7651D3CF9090004E8B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9BABD76B1D3CFF810004E8B4 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSRecordingManager.swift; sourceTree = "<group>"; };
+		9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSURLExtension.swift; sourceTree = "<group>"; };
+		9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSOverlayPreview.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +66,9 @@
 			children = (
 				9BABD7591D3CF9090004E8B4 /* AppDelegate.swift */,
 				9BABD75B1D3CF9090004E8B4 /* CaptureViewController.swift */,
+				9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */,
+				9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */,
+				9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */,
 				9BABD75D1D3CF9090004E8B4 /* Main.storyboard */,
 				9BABD7601D3CF9090004E8B4 /* Assets.xcassets */,
 				9BABD7621D3CF9090004E8B4 /* LaunchScreen.storyboard */,
@@ -148,8 +157,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BF1E5AE1D3FB29800301C04 /* HSOverlayPreview.swift in Sources */,
+				9BF1E5AC1D3FB09B00301C04 /* NSURLExtension.swift in Sources */,
 				9BABD75C1D3CF9090004E8B4 /* CaptureViewController.swift in Sources */,
 				9BABD75A1D3CF9090004E8B4 /* AppDelegate.swift in Sources */,
+				9BF1E5AA1D3FAF0500301C04 /* HSRecordingManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

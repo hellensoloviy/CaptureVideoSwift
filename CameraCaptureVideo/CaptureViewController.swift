@@ -10,26 +10,48 @@ import UIKit
 import AVFoundation
 import AssetsLibrary
 
-class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate, AVCaptureFileOutputRecordingDelegate {
-    
-    var isRecording = false {
-        didSet {
-                if isRecording {
-                    prepareRecordControls()
-                }
-        }
-    }
-    
-    var isSaving = false
+class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
     
     var camera : Bool = true
+    var cameraSession: AVCaptureSession?
+    var previewLayer: AVCaptureVideoPreviewLayer?
+    var recordControl: HSRecordingManager = HSRecordingManager()
     
+    //    @IBOutlet weak var startStopButton: UIButton!
+    var startButton = UIButton.init(type: .Custom)
+    let dataOutput = AVCaptureVideoDataOutput()
+    var videoFileOutput = AVCaptureMovieFileOutput()
+    
+    //MARK: - Button's actions
+    @IBAction func cameraSourceChanged(sender: AnyObject) {
+        camera = !camera
+        reloadSession()
+    }
+    
+    @IBAction func popToController(sender: AnyObject) {
+        self.navigationController?.popViewControllerAnimated(true)
+    }
+    
+    
+    //MARK: - View load methods
     override func viewDidLoad() {
         super.viewDidLoad()
+        recordControl.timeDelegate = self
         setupCameraSession()
         setupNavBar()
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(animated)
+        view.addSubview(HSOverlayPreview.overlayView())
+        addPlayStopButton()
         
-        }
+    }
+    
+    override func viewDidDisappear(animated: Bool) {
+        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
+        
+    }
     
     func setupNavBar() {
         
@@ -48,67 +70,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
 
         UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.LightContent, animated: true)
 
-
     }
-    
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(animated)
-        view.addSubview(overlayView())
-        addPlayStopButton()
-        
-    }
-    
-     //MARK: overlay
-    func overlayView() -> UIView {
-        let overlayView = UIView()
-        overlayView.frame = UIScreen.mainScreen().bounds
-        
-        let halfWidth = overlayView.frame.size.width/4
-        let width = overlayView.frame.size.width/2
-        let height = overlayView.frame.size.height/3
-        
-        let pathRectFrame = CGRectMake(halfWidth, height+15, width, width)
-        
-        let blur = UIBlurEffect.init(style: .Dark)
-        let visualEffectView = UIVisualEffectView.init(effect: blur)
-        visualEffectView.frame = overlayView.frame
-        
-        overlayView.addSubview(visualEffectView)
-        
-        let shapeLayer = CAShapeLayer()
-        let path1 = CGPathCreateMutable()
-        CGPathAddRect(path1, nil, pathRectFrame)
-        
-        CGPathAddRect(path1, nil, overlayView.frame);
-        shapeLayer.path = path1
-        shapeLayer.fillRule = kCAFillRuleEvenOdd
-        overlayView.layer.mask = shapeLayer
-
-        let imageView = UIImageView.init(image: UIImage.init(named: "CaptureDevice"))
-        imageView.contentMode = .ScaleAspectFit
-        imageView.frame = overlayView.frame
-        imageView.clipsToBounds = true
-        imageView.backgroundColor = UIColor.clearColor()
-        overlayView.addSubview(imageView)
-        
-        return overlayView
-    }
-    
-    var cameraSession: AVCaptureSession?
-    var previewLayer: AVCaptureVideoPreviewLayer?
-    
-    @IBAction func cameraSourceChanged(sender: AnyObject) {
-        camera = !camera
-        self.setupCameraSession()
-        self.addPlayStopButton()
-    }
-    
-    @IBAction func popToController(sender: AnyObject) {
-        self.navigationController?.popViewControllerAnimated(true)
-    }
-    
-    let dataOutput = AVCaptureVideoDataOutput()
     
     func setupCameraSession() {
         var captureDevice:AVCaptureDevice! = nil
@@ -169,7 +131,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             previewLayer = preview;
             
             view.layer.addSublayer(previewLayer!)
-            view.addSubview(overlayView())
+            view.addSubview(HSOverlayPreview.overlayView())
             cameraSession!.startRunning()
         }
             
@@ -178,24 +140,13 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
     
-    
-    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
-        
+    func reloadSession() {
+        self.setupCameraSession()
+        self.addPlayStopButton()
     }
+    
 
-    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
-        
-        if (error == nil) {
-            print("Suscess")
-            self.cropVideoToSquareCentered(outputFileURL, completion: { (newPath) in
-                self.saveToCameraRoll(newPath)
-            })
-        } else {
-            print("Erorr!")
-        }
-    }
-    
-        func cropVideoToSquareCentered(path: NSURL, completion: (newPath: NSURL) -> ()) {
+    func cropVideoToSquareCentered(path: NSURL, completion: (newPath: NSURL) -> ()) {
         let asset = AVAsset(URL: path)
         guard let track = asset.tracksWithMediaType(AVMediaTypeVideo).first else {
             //TODO throw error
@@ -251,9 +202,9 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             else {
                 NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString)
                 
-                if (self.isSaving == true) {
+                if (self.recordControl.isSaving == true) {
                     print("Stop Saving --")
-                    self.isSaving = false
+                    self.recordControl.isSaving = false
                     
                     dispatch_async(dispatch_get_main_queue(), {
                         self.startButton.setTitle("Go!", forState: .Normal) // time
@@ -267,15 +218,14 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
             library.writeVideoAtPathToSavedPhotosAlbum(URL, completionBlock: videoWriteCompletionBlock)
         }
     }
-
-    var startButton = UIButton.init(type: .Custom)
+    
     
     //MARK: PLay/Stop button
     func addPlayStopButton() {
         
         startButton.frame = CGRectMake(0, 0, UIScreen.mainScreen().bounds.size.width/3 , 30)
         
-        if (isSaving == true) {
+        if (recordControl.isSaving == true) {
             startButton.setTitle("Saving..", forState: .Normal)
         } else {
             startButton.setTitle("Go!", forState: .Normal)
@@ -295,12 +245,12 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     
     func changeRecordingState(sender: UIButton) {
         
-        if (isRecording == false) {
+        if (recordControl.isRecording == false) {
             
-            if (isSaving == true) { return }
+            if (recordControl.isSaving == true) { return }
                 
             print("Starting Recording")
-            isRecording = true
+            recordControl.isRecording = true
             
             startButton.setTitle("Recording..", forState: .Normal) // time
             startButton.addTarget(self, action: #selector(changeRecordingState), forControlEvents: .TouchUpInside)
@@ -311,12 +261,12 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         } else {
             
             print("Stop Recording")
-            isRecording = false
+            recordControl.isRecording = false
             stopRecording()
 
-            if (isSaving == false) {
+            if (recordControl.isSaving == false) {
                 print("Start Saving --")
-                isSaving = true
+                recordControl.isSaving = true
                 startButton.setTitle("Saving...", forState: .Normal) // time
                 return;
             
@@ -328,89 +278,59 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         }
     }
     
-    var videoFileOutput = AVCaptureMovieFileOutput()
     
     func startRecording() {
         print("Start")
         let recordingDelegate:AVCaptureFileOutputRecordingDelegate? = self
         videoFileOutput = AVCaptureMovieFileOutput()
         cameraSession!.addOutput(videoFileOutput)
-        startCounter()
+        recordControl.startCounter()
         
         let outputUrl = NSURL(fileURLWithPath: NSTemporaryDirectory() + "test.m4v")
         videoFileOutput.startRecordingToOutputFileURL(outputUrl, recordingDelegate: recordingDelegate)
     }
     
+    
+    
     func stopRecording() {
         print("Stop Recording")
         videoFileOutput.stopRecording()
-        stopCounter();
-        self.setupCameraSession()
-        self.addPlayStopButton()
+        recordControl.stopCounter();
+        reloadSession()
         
     }
     
-    //MARK: time 
     
-    var timeElapsed: UInt32 = 0
-    var secondTimer: NSTimer?
+
+}
+
+extension CaptureViewController: AVCaptureFileOutputRecordingDelegate {
     
-    func prepareRecordControls() {
-        timeElapsed = 0
-        updateTimeLabel(0)
-    }
-    
-    func startCounter() {
-        secondTimer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(secondElapsed), userInfo: nil, repeats: true)
-    }
-    
-    func secondElapsed() {
-        updateTimeLabel(++timeElapsed)
-    }
-    
-    func updateTimeLabel(time:UInt32) {
-        let seconds = time%60
-        let minutes = (time%(60*60))/60
-        let hours = time/(60*60)
-        let timeStr = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        startButton.setTitle(timeStr, forState: .Normal)
-    }
-    
-    func stopCounter() {
-        secondTimer?.invalidate()
-    }
-    
-    //MARK: String
-    
-    func randomStringWithLength (len : Int = 20) -> NSString {
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didStartRecordingToOutputFileAtURL fileURL: NSURL!, fromConnections connections: [AnyObject]!) {
         
-        let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        let randomString : NSMutableString = NSMutableString(capacity: len)
-        for _ in 0 ..< len {
-            let length = UInt32 (letters.length)
-            let rand = arc4random_uniform(length)
-            randomString.appendFormat("%C", letters.characterAtIndex(Int(rand)))
-        }
-        return randomString
     }
     
-    override func viewDidDisappear(animated: Bool) {
-        UIApplication.sharedApplication().setStatusBarStyle(UIStatusBarStyle.Default, animated: true)
-
-    }
-}
-
-extension NSURL {
-    static func tempPathForFile(name: String) -> NSURL {
-        let outputPath = NSTemporaryDirectory() + name
-        if NSFileManager.defaultManager().fileExistsAtPath(outputPath) {
-            do {
-                try NSFileManager.defaultManager().removeItemAtPath(outputPath)
-            }
-            catch let error as NSError {
-                print(error.localizedDescription)
-            }
+    func captureOutput(captureOutput: AVCaptureFileOutput!, didFinishRecordingToOutputFileAtURL outputFileURL: NSURL!, fromConnections connections: [AnyObject]!, error: NSError!) {
+        
+        if (error == nil) {
+            print("Suscess")
+            self.cropVideoToSquareCentered(outputFileURL, completion: { (newPath) in
+                self.saveToCameraRoll(newPath)
+            })
+            
+            
+        } else {
+            print("Erorr!")
         }
-        return NSURL(fileURLWithPath: outputPath)
     }
+    
 }
+
+extension CaptureViewController: HSTimeCounterDelegate {
+    
+     func timeUpdate(time: String) {
+        startButton.setTitle(time, forState: .Normal)
+    }
+    
+}
+
