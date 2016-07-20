@@ -16,6 +16,8 @@
 		9BF1E5AA1D3FAF0500301C04 /* HSRecordingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */; };
 		9BF1E5AC1D3FB09B00301C04 /* NSURLExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */; };
 		9BF1E5AE1D3FB29800301C04 /* HSOverlayPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */; };
+		9BF1E5B41D3FBAEB00301C04 /* HSVideoCropManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5B31D3FBAEB00301C04 /* HSVideoCropManager.swift */; };
+		9BF1E5B71D3FBBEA00301C04 /* HSSaveManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF1E5B61D3FBBEA00301C04 /* HSSaveManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSRecordingManager.swift; sourceTree = "<group>"; };
 		9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSURLExtension.swift; sourceTree = "<group>"; };
 		9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSOverlayPreview.swift; sourceTree = "<group>"; };
+		9BF1E5B31D3FBAEB00301C04 /* HSVideoCropManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSVideoCropManager.swift; sourceTree = "<group>"; };
+		9BF1E5B61D3FBBEA00301C04 /* HSSaveManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HSSaveManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,14 +69,11 @@
 			isa = PBXGroup;
 			children = (
 				9BABD7591D3CF9090004E8B4 /* AppDelegate.swift */,
-				9BABD75B1D3CF9090004E8B4 /* CaptureViewController.swift */,
-				9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */,
-				9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */,
-				9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */,
-				9BABD75D1D3CF9090004E8B4 /* Main.storyboard */,
-				9BABD7601D3CF9090004E8B4 /* Assets.xcassets */,
-				9BABD7621D3CF9090004E8B4 /* LaunchScreen.storyboard */,
-				9BABD7651D3CF9090004E8B4 /* Info.plist */,
+				9BF1E5AF1D3FBA8A00301C04 /* Main */,
+				9BF1E5B51D3FBB7900301C04 /* Capture&Proccessing */,
+				9BF1E5B01D3FBA9000301C04 /* Preview */,
+				9BF1E5B11D3FBA9B00301C04 /* Extensions */,
+				9BF1E5B21D3FBAAE00301C04 /* Supporting Files */,
 			);
 			path = CameraCaptureVideo;
 			sourceTree = "<group>";
@@ -83,6 +84,51 @@
 				9BABD76B1D3CFF810004E8B4 /* AVFoundation.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9BF1E5AF1D3FBA8A00301C04 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				9BABD75B1D3CF9090004E8B4 /* CaptureViewController.swift */,
+			);
+			name = Main;
+			sourceTree = "<group>";
+		};
+		9BF1E5B01D3FBA9000301C04 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				9BF1E5AD1D3FB29800301C04 /* HSOverlayPreview.swift */,
+			);
+			name = Preview;
+			sourceTree = "<group>";
+		};
+		9BF1E5B11D3FBA9B00301C04 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				9BF1E5AB1D3FB09B00301C04 /* NSURLExtension.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
+		9BF1E5B21D3FBAAE00301C04 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				9BABD75D1D3CF9090004E8B4 /* Main.storyboard */,
+				9BABD7601D3CF9090004E8B4 /* Assets.xcassets */,
+				9BABD7621D3CF9090004E8B4 /* LaunchScreen.storyboard */,
+				9BABD7651D3CF9090004E8B4 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		9BF1E5B51D3FBB7900301C04 /* Capture&Proccessing */ = {
+			isa = PBXGroup;
+			children = (
+				9BF1E5A91D3FAF0500301C04 /* HSRecordingManager.swift */,
+				9BF1E5B31D3FBAEB00301C04 /* HSVideoCropManager.swift */,
+				9BF1E5B61D3FBBEA00301C04 /* HSSaveManager.swift */,
+			);
+			name = "Capture&Proccessing";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -157,6 +203,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BF1E5B41D3FBAEB00301C04 /* HSVideoCropManager.swift in Sources */,
+				9BF1E5B71D3FBBEA00301C04 /* HSSaveManager.swift in Sources */,
 				9BF1E5AE1D3FB29800301C04 /* HSOverlayPreview.swift in Sources */,
 				9BF1E5AC1D3FB09B00301C04 /* NSURLExtension.swift in Sources */,
 				9BABD75C1D3CF9090004E8B4 /* CaptureViewController.swift in Sources */,

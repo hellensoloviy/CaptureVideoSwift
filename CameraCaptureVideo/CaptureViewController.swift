@@ -12,15 +12,18 @@ import AssetsLibrary
 
 class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate, UINavigationBarDelegate {
     
+    //MARK: Vars
     var camera : Bool = true
     var cameraSession: AVCaptureSession?
     var previewLayer: AVCaptureVideoPreviewLayer?
     var recordControl: HSRecordingManager = HSRecordingManager()
-    
-    //    @IBOutlet weak var startStopButton: UIButton!
     var startButton = UIButton.init(type: .Custom)
     let dataOutput = AVCaptureVideoDataOutput()
     var videoFileOutput = AVCaptureMovieFileOutput()
+    var saveManager: HSSaveManager?
+    
+    //MARK: Outlets
+    @IBOutlet weak var switchCameraButton: UIBarButtonItem!
     
     //MARK: - Button's actions
     @IBAction func cameraSourceChanged(sender: AnyObject) {
@@ -37,6 +40,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     override func viewDidLoad() {
         super.viewDidLoad()
         recordControl.timeDelegate = self
+        HSSaveManager.stateDelegate = self
         setupCameraSession()
         setupNavBar()
     }
@@ -76,7 +80,6 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         var captureDevice:AVCaptureDevice! = nil
         
         cameraSession?.stopRunning()
-        
         cameraSession = AVCaptureSession()
         cameraSession!.sessionPreset = AVCaptureSessionPresetLow
         
@@ -146,78 +149,7 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     }
     
 
-    func cropVideoToSquareCentered(path: NSURL, completion: (newPath: NSURL) -> ()) {
-        let asset = AVAsset(URL: path)
-        guard let track = asset.tracksWithMediaType(AVMediaTypeVideo).first else {
-            //TODO throw error
-            return
-        }
-        
-        let composition = AVMutableVideoComposition()
 
-        composition.frameDuration = track.minFrameDuration
-        let trackSize = track.naturalSize
-        composition.renderSize = CGSizeMake(trackSize.width, trackSize.width)
-        
-        let compositionInstruction = AVMutableVideoCompositionInstruction()
-        compositionInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, CMTimeMakeWithSeconds(60, 30));
-        
-        let layerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: track)
-            
-        let transform = CGAffineTransformMakeTranslation(0, -(trackSize.height-trackSize.width)/2)
-        layerInstruction.setTransform(transform, atTime: kCMTimeZero)
-        
-        compositionInstruction.layerInstructions = [layerInstruction]
-        composition.instructions = [compositionInstruction]
-
-        let tempPath = NSURL.tempPathForFile("temp_cropped.m4v")
-            
-        guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetHighestQuality) else {
-            return
-        }
-        exporter.videoComposition = composition
-        exporter.outputURL = tempPath
-        exporter.outputFileType = AVFileTypeMPEG4
-        exporter.exportAsynchronouslyWithCompletionHandler { () -> Void in
-            if (exporter.status == .Completed) {
-                
-                completion(newPath: path)
-                NSLog("path -- %@", path)
-                NSLog("tempPath -- %@", tempPath)
-                
-     
-
-            }
-        }
-    }
-
-    func saveToCameraRoll(URL: NSURL!) {
-        
-        NSLog("srcURL: %@", URL)
-        let library: ALAssetsLibrary = ALAssetsLibrary()
-        let videoWriteCompletionBlock: ALAssetsLibraryWriteVideoCompletionBlock = {(newURL: NSURL!, error: NSError!) in
-            if (error != nil) {
-                NSLog("Error writing image with metadata to Photo Library: %@", error)
-            }
-            else {
-                NSLog("Wrote image with metadata to Photo Library %@", newURL.absoluteString)
-                
-                if (self.recordControl.isSaving == true) {
-                    print("Stop Saving --")
-                    self.recordControl.isSaving = false
-                    
-                    dispatch_async(dispatch_get_main_queue(), {
-                        self.startButton.setTitle("Go!", forState: .Normal) // time
-                        
-                    })
-                }
-                
-            }
-        }
-        if library.videoAtPathIsCompatibleWithSavedPhotosAlbum(URL) {
-            library.writeVideoAtPathToSavedPhotosAlbum(URL, completionBlock: videoWriteCompletionBlock)
-        }
-    }
     
     
     //MARK: PLay/Stop button
@@ -279,17 +211,20 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
     }
     
     
+    
+    //MARK: Recording
     func startRecording() {
-        print("Start")
+        print("Start Recording")
         let recordingDelegate:AVCaptureFileOutputRecordingDelegate? = self
         videoFileOutput = AVCaptureMovieFileOutput()
         cameraSession!.addOutput(videoFileOutput)
         recordControl.startCounter()
+        switchCameraButton.enabled = false
         
-        let outputUrl = NSURL(fileURLWithPath: NSTemporaryDirectory() + "test.m4v")
+        let outputUrl = NSURL(fileURLWithPath: NSTemporaryDirectory() + "temp.m4v")
         videoFileOutput.startRecordingToOutputFileURL(outputUrl, recordingDelegate: recordingDelegate)
+        
     }
-    
     
     
     func stopRecording() {
@@ -297,9 +232,10 @@ class CaptureViewController: UIViewController, AVCaptureVideoDataOutputSampleBuf
         videoFileOutput.stopRecording()
         recordControl.stopCounter();
         reloadSession()
-        
+        switchCameraButton.enabled = true
+
     }
-    
+
     
 
 }
@@ -314,10 +250,9 @@ extension CaptureViewController: AVCaptureFileOutputRecordingDelegate {
         
         if (error == nil) {
             print("Suscess")
-            self.cropVideoToSquareCentered(outputFileURL, completion: { (newPath) in
-                self.saveToCameraRoll(newPath)
+            HSVideoCropManager.cropVideoToSquareCentered(outputFileURL, completion: { (newPath) in
+                HSSaveManager.saveToCameraRoll(newPath)
             })
-            
             
         } else {
             print("Erorr!")
@@ -330,6 +265,22 @@ extension CaptureViewController: HSTimeCounterDelegate {
     
      func timeUpdate(time: String) {
         startButton.setTitle(time, forState: .Normal)
+    }
+    
+}
+
+extension CaptureViewController: HSSaveButtonStateDelegate {
+    
+    func changeButtonState() {
+        if (recordControl.isSaving == true) {
+            print("Stop Saving --")
+            recordControl.isSaving = false
+            
+            dispatch_async(dispatch_get_main_queue(), {
+                self.startButton.setTitle("Go!", forState: .Normal)
+                
+            })
+        }
     }
     
 }

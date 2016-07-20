@@ -93,6 +93,9 @@
                             </connections>
                         </barButtonItem>
                     </navigationItem>
+                    <connections>
+                        <outlet property="switchCameraButton" destination="hrs-JP-jji" id="mew-Nr-6oY"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sQ3-Qz-mLn" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
